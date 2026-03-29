@@ -3,10 +3,13 @@ import { useGame } from '../GameContext'
 import { LOCATIONS } from '../data/locations'
 import { getHopDistance } from '../data/routes'
 import StatsBar from '../ui/StatsBar'
+import { getLocationImagePath } from '../utils/imagePaths'
 
 export default function SprintPhase() {
   const { state, dispatch } = useGame()
   const [step, setStep] = useState('alert') // 'alert' | 'vehicle' | 'shelter'
+  
+  const bgImage = getLocationImagePath(state.location, 'sprint', state.world.timeUntilLandfall)
 
   const handleVehicle = (choice) => {
     dispatch({ type: 'SET_VEHICLE', payload: choice })
@@ -32,8 +35,16 @@ export default function SprintPhase() {
 
   if (step === 'alert') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-950">
-        <div className="text-center space-y-6 max-w-md px-4">
+      <div className="h-[100dvh] flex items-center justify-center relative">
+        {bgImage && (
+          <div 
+            className="absolute inset-0 bg-cover bg-center z-0 ken-burns-bg"
+            style={{ backgroundImage: `url("${bgImage}")` }}
+          />
+        )}
+        <div className="absolute inset-0 bg-gray-950/80 backdrop-blur-sm z-0" />
+        
+        <div className="text-center space-y-6 max-w-md px-4 relative z-20">
           <div className="space-y-2">
             <h1 className="text-3xl font-bold text-red-500 tracking-wider uppercase animate-pulse">
               Hurricane Helios Has Arrived
@@ -55,9 +66,17 @@ export default function SprintPhase() {
 
   if (step === 'vehicle') {
     return (
-      <div className="min-h-screen flex flex-col bg-gray-950">
+      <div className="h-[100dvh] flex flex-col relative">
+        {bgImage && (
+          <div 
+            className="absolute inset-0 bg-cover bg-center z-0 ken-burns-bg"
+            style={{ backgroundImage: `url("${bgImage}")` }}
+          />
+        )}
+        <div className="absolute inset-0 bg-gray-950/80 backdrop-blur-sm z-0" />
+        
         <StatsBar />
-        <div className="flex-1 flex items-center justify-center px-4">
+        <div className="flex-1 flex items-center justify-center px-4 relative z-20">
           <div className="max-w-lg w-full space-y-6">
             <div className="text-center space-y-2">
               <h2 className="text-2xl font-bold text-white">Vehicle Protocol</h2>
@@ -69,7 +88,7 @@ export default function SprintPhase() {
             <div className="grid gap-4">
               <button
                 onClick={() => handleVehicle('lot')}
-                className="bg-gray-900 border border-gray-700 hover:border-red-600 rounded-lg p-4 text-left transition-colors group"
+                className="bg-gray-900/80 backdrop-blur-sm border border-gray-700 hover:border-red-500 rounded-lg p-4 text-left transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_15px_rgba(239,68,68,0.15)] group"
               >
                 <h3 className="font-bold text-gray-200 group-hover:text-red-400">Surface Parking Lot</h3>
                 <p className="text-sm text-gray-500 mt-1">
@@ -80,7 +99,7 @@ export default function SprintPhase() {
 
               <button
                 onClick={() => handleVehicle('garage')}
-                className="bg-gray-900 border border-gray-700 hover:border-green-600 rounded-lg p-4 text-left transition-colors group"
+                className="bg-gray-900/80 backdrop-blur-sm border border-gray-700 hover:border-green-500 rounded-lg p-4 text-left transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_15px_rgba(74,222,128,0.15)] group"
               >
                 <h3 className="font-bold text-gray-200 group-hover:text-green-400">Beard Garage (Upper Floors)</h3>
                 <p className="text-sm text-gray-500 mt-1">
@@ -102,9 +121,17 @@ export default function SprintPhase() {
   })
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-950">
+    <div className="h-[100dvh] flex flex-col relative">
+      {bgImage && (
+        <div 
+          className="absolute inset-0 bg-cover bg-center z-0 ken-burns-bg"
+          style={{ backgroundImage: `url("${bgImage}")` }}
+        />
+      )}
+      <div className="absolute inset-0 bg-gray-950/80 backdrop-blur-sm z-0" />
+      
       <StatsBar />
-      <div className="flex-1 flex items-center justify-center px-4">
+      <div className="flex-1 flex items-center justify-center px-4 relative z-20">
         <div className="max-w-lg w-full space-y-6">
           <div className="text-center space-y-2">
             <h2 className="text-2xl font-bold text-white">Choose Your Shelter</h2>
@@ -125,12 +152,12 @@ export default function SprintPhase() {
                 <button
                   key={loc.id}
                   onClick={() => handleShelter(loc.id)}
-                  className={`bg-gray-900 border rounded-lg p-3 text-left transition-colors ${
+                  className={`bg-gray-900/80 backdrop-blur-sm border rounded-lg p-3 text-left transition-all duration-300 hover:scale-[1.02] ${
                     loc.elevation >= 4
-                      ? 'border-green-800/50 hover:border-green-600'
+                      ? 'border-green-800/50 hover:border-green-500 hover:shadow-[0_0_15px_rgba(74,222,128,0.15)]'
                       : loc.elevation >= 3
-                      ? 'border-yellow-800/50 hover:border-yellow-600'
-                      : 'border-red-800/50 hover:border-red-600'
+                      ? 'border-yellow-800/50 hover:border-yellow-500 hover:shadow-[0_0_15px_rgba(234,179,8,0.15)]'
+                      : 'border-red-800/50 hover:border-red-500 hover:shadow-[0_0_15px_rgba(239,68,68,0.15)]'
                   }`}
                 >
                   <div className="flex items-center justify-between">

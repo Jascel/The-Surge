@@ -13,9 +13,9 @@ export default function ItemGuidePanel({ itemId, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/50" />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity" />
       <div
-        className="relative w-full max-w-sm bg-gray-900 border-l border-gray-700 p-6 overflow-y-auto"
+        className="relative w-full max-w-sm bg-gray-900/95 backdrop-blur-md border-l border-gray-700 p-6 overflow-y-auto shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <button

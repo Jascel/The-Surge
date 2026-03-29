@@ -1,9 +1,13 @@
 import { useState } from 'react'
 import { useGame } from '../GameContext'
+import { getLocationImagePath } from '../utils/imagePaths'
 
 export default function StartScreen() {
   const { dispatch } = useGame()
   const [name, setName] = useState('')
+  
+  // Use MSC stage 1 as the background for the start screen
+  const bgImage = getLocationImagePath('msc', 'gathering', 12)
 
   const handleStart = (e) => {
     e.preventDefault()
@@ -13,8 +17,17 @@ export default function StartScreen() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-gradient-to-b from-gray-950 via-slate-900 to-gray-950">
-      <div className="max-w-lg w-full text-center space-y-8">
+    <div className="h-[100dvh] flex flex-col items-center justify-center px-4 relative">
+      {/* Background */}
+      {bgImage && (
+        <div 
+          className="absolute inset-0 bg-cover bg-center z-0 ken-burns-bg"
+          style={{ backgroundImage: `url("${bgImage}")` }}
+        />
+      )}
+      <div className="absolute inset-0 bg-gray-950/80 backdrop-blur-sm z-0" />
+
+      <div className="max-w-lg w-full text-center space-y-8 relative z-10 bg-gray-900/40 p-8 rounded-2xl border border-gray-700/50 backdrop-blur-md shadow-2xl">
         {/* Title */}
         <div className="space-y-2">
           <h1 className="text-5xl font-bold tracking-widest text-white uppercase">
@@ -59,14 +72,14 @@ export default function StartScreen() {
           <button
             type="submit"
             disabled={!name.trim()}
-            className="w-full bg-cyan-600 hover:bg-cyan-500 disabled:bg-gray-700 disabled:text-gray-500 text-white font-bold py-3 px-8 rounded tracking-wider uppercase transition-colors"
+            className="w-full bg-cyan-600/90 hover:bg-cyan-500 disabled:bg-gray-700/50 disabled:text-gray-500 text-white font-bold py-3 px-8 rounded tracking-wider uppercase transition-all duration-300 hover:scale-105 hover:shadow-[0_0_15px_rgba(6,182,212,0.4)] backdrop-blur-sm"
           >
             Begin
           </button>
         </form>
 
         {/* Footer */}
-        <p className="text-xs text-gray-600">
+        <p className="text-xs text-gray-500">
           HackUSF 2026 | Climate Teach-In Challenge
         </p>
       </div>

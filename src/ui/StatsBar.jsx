@@ -36,7 +36,7 @@ export default function StatsBar() {
   const { state } = useGame()
 
   return (
-    <div className="bg-gray-900/90 border-b border-gray-800 px-4 py-2 flex items-center justify-between gap-4 z-30 relative">
+    <div className="bg-gray-900/80 backdrop-blur-md border-b border-gray-800 px-4 py-2 flex items-center justify-between gap-4 z-30 relative shadow-md">
       <div className="flex items-center gap-4 flex-wrap">
         {STAT_CONFIG.map((stat) => (
           <StatBar key={stat.key} stat={stat} value={state.stats[stat.key]} />

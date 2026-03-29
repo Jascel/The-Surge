@@ -25,7 +25,7 @@ export const ITEMS = {
     id: 'energy_bar',
     name: 'Energy Bar',
     emoji: '\u{1F36B}',
-    weight: 0,
+    weight: 1,
     guide: {
       use: 'Compact emergency calories ideal for bug-out bags.',
       howTo: 'High energy density in minimal space. Good supplement to main food supply.',
@@ -91,7 +91,7 @@ export const ITEMS = {
     id: 'campus_map',
     name: 'Campus Map',
     emoji: '\u{1F5FA}\u{FE0F}',
-    weight: 0,
+    weight: 1,
     guide: {
       use: 'Reveals Pizzo Elementary as the on-campus official FEMA shelter.',
       howTo: 'Know your evacuation routes and shelter locations before a storm.',
@@ -124,11 +124,72 @@ export const ITEMS = {
     id: 'whistle',
     name: 'Emergency Whistle',
     emoji: '\u{1F4E2}',
-    weight: 0,
+    weight: 2,
     guide: {
       use: 'Signal for help when voice cannot carry. Universal distress signal: 3 short blasts.',
       howTo: 'A Fox 40 pealess whistle carries 100+ decibels and works when wet.',
       femaRef: 'FEMA: Include a whistle in your emergency kit to signal for help.',
+    },
+  },
+  // === JUNK ITEMS (no survival value) ===
+  usb_drive: {
+    id: 'usb_drive',
+    name: 'USB Drive',
+    emoji: '\u{1F4BE}',
+    weight: 1,
+    isJunk: true,
+    guide: {
+      use: 'Contains someone\'s old homework files. Completely useless in a hurricane.',
+      howTo: 'You could throw it, I guess.',
+      femaRef: 'FEMA does not recommend backing up your essays as a survival strategy.',
+    },
+  },
+  sunglasses: {
+    id: 'sunglasses',
+    name: 'Broken Sunglasses',
+    emoji: '\u{1F576}\u{FE0F}',
+    weight: 1,
+    isJunk: true,
+    guide: {
+      use: 'One lens is cracked and the other is missing. Peak fashion during a Category 4.',
+      howTo: 'Wear them if you want to look cool while being swept away.',
+      femaRef: 'FEMA: Sunglasses are not on any emergency preparedness checklist.',
+    },
+  },
+  textbook: {
+    id: 'textbook',
+    name: 'Soaked Textbook',
+    emoji: '\u{1F4D5}',
+    weight: 3,
+    isJunk: true,
+    guide: {
+      use: 'An Introduction to Organic Chemistry, now an introduction to paper mache.',
+      howTo: 'Could be used as a doorstop. That\'s about it.',
+      femaRef: 'FEMA: Knowledge is power, but not this kind. Not right now.',
+    },
+  },
+  lanyard: {
+    id: 'lanyard',
+    name: 'USF Lanyard',
+    emoji: '\u{1F3AB}',
+    weight: 1,
+    isJunk: true,
+    guide: {
+      use: 'Shows your school spirit. Does nothing else.',
+      howTo: 'Wear it around your neck so rescuers know your alma mater.',
+      femaRef: 'FEMA: University merchandise is not part of any disaster preparedness plan.',
+    },
+  },
+  phone_charger: {
+    id: 'phone_charger',
+    name: 'Phone Charger (No Phone)',
+    emoji: '\u{1F50C}',
+    weight: 1,
+    isJunk: true,
+    guide: {
+      use: 'A Lightning cable. Your phone died 3 hours ago and there\'s no outlet in sight.',
+      howTo: 'Coil it up neatly. Feels productive. Accomplishes nothing.',
+      femaRef: 'FEMA: Keep devices charged BEFORE the storm. This cable won\'t help now.',
     },
   },
 }

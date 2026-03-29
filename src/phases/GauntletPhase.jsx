@@ -1,16 +1,23 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useGame } from '../GameContext'
 import { GAUNTLET_EVENTS } from '../data/events'
 import { ITEMS } from '../data/items'
 import StatsBar from '../ui/StatsBar'
+import Inventory from '../ui/Inventory'
+import ItemGuidePanel from '../ui/ItemGuidePanel'
+import { getLocationImagePath } from '../utils/imagePaths'
 
 export default function GauntletPhase() {
   const { state, dispatch } = useGame()
   const [eventIndex, setEventIndex] = useState(0)
   const [outcome, setOutcome] = useState(null)
   const [shaking, setShaking] = useState(false)
+  const [flashing, setFlashing] = useState(false)
+  const [selectedItem, setSelectedItem] = useState(null)
 
   const currentEvent = GAUNTLET_EVENTS[eventIndex]
+  
+  const bgImage = getLocationImagePath(state.shelter || state.location, 'gauntlet', 0)
 
   if (!currentEvent) {
     // All events done
@@ -62,10 +69,12 @@ export default function GauntletPhase() {
     // Increment surge
     dispatch({ type: 'INCREMENT_SURGE' })
 
-    // Screen shake for dramatic events
+    // Screen shake and lightning for dramatic events
     if (state.world.surgeLevel >= 4) {
       setShaking(true)
+      setFlashing(true)
       setTimeout(() => setShaking(false), 300)
+      setTimeout(() => setFlashing(false), 500)
     }
 
     setOutcome({ text: replaceName(result.note), statChanges })
@@ -81,27 +90,44 @@ export default function GauntletPhase() {
   }
 
   // Background darkness increases with surge
-  const bgOpacity = 0.3 + (state.world.surgeLevel / 8) * 0.5
+  const bgOpacity = 0.5 + (state.world.surgeLevel / 8) * 0.4
 
   return (
-    <div className={`min-h-screen flex flex-col bg-gray-950 ${shaking ? 'screen-shake' : ''}`}>
-      <StatsBar />
+    <div className={`h-[100dvh] flex flex-col relative ${shaking ? 'screen-shake' : ''}`}>
+      {/* Full-screen background image */}
+      {bgImage && (
+        <div 
+          className="absolute inset-0 bg-cover bg-center z-0 ken-burns-bg"
+          style={{ backgroundImage: `url("${bgImage}")` }}
+        />
+      )}
+      
+      {/* Heavy dark overlay for readability and gloom */}
+      <div className="absolute inset-0 bg-gray-950/80 backdrop-blur-sm z-0" style={{ opacity: bgOpacity }} />
+      
+      {/* Lightning flash overlay */}
+      {flashing && (
+        <div className="absolute inset-0 bg-white z-10 lightning-flash pointer-events-none" />
+      )}
+
+      <div className="relative z-20">
+        <StatsBar />
+      </div>
 
       {/* Rising water bar at bottom */}
       <div
         className="fixed bottom-0 left-0 w-full transition-all duration-1000 z-10 pointer-events-none"
         style={{
           height: `${(state.world.surgeLevel / 8) * 30}%`,
-          background: 'linear-gradient(to top, rgba(30, 64, 175, 0.3), transparent)',
+          background: 'linear-gradient(to top, rgba(30, 64, 175, 0.4), transparent)',
         }}
       />
 
-      <div className="flex-1 flex items-center justify-center px-4 relative z-20">
+      <div className="flex-1 flex items-center justify-center px-4 relative z-20 pb-20">
         <div className="max-w-xl w-full">
           {/* Event card */}
           <div
-            className="bg-gray-900/90 border border-gray-700 rounded-lg overflow-hidden"
-            style={{ boxShadow: `0 0 60px rgba(0,0,0,${bgOpacity})` }}
+            className="bg-gray-900/80 backdrop-blur-md border border-gray-700/50 rounded-lg overflow-hidden shadow-2xl"
           >
             {/* Surge indicator */}
             <div className="bg-blue-950/50 px-4 py-2 flex items-center justify-between border-b border-gray-800">
@@ -153,7 +179,7 @@ export default function GauntletPhase() {
                   </div>
                   <button
                     onClick={handleContinue}
-                    className="w-full bg-gray-700 hover:bg-gray-600 text-white py-3 rounded font-bold tracking-wider transition-colors"
+                    className="w-full bg-gray-700/80 hover:bg-gray-600 text-white py-3 rounded font-bold tracking-wider transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_15px_rgba(255,255,255,0.1)] backdrop-blur-sm"
                   >
                     {eventIndex + 1 >= GAUNTLET_EVENTS.length ? 'Face the Dawn' : 'Continue'}
                   </button>
@@ -171,12 +197,12 @@ export default function GauntletPhase() {
                       <button
                         key={i}
                         onClick={() => handleChoice(choice)}
-                        className={`w-full text-left rounded-lg p-4 border transition-all ${
+                        className={`w-full text-left rounded-lg p-4 border transition-all duration-300 hover:scale-[1.01] ${
                           choice.requiresItem
                             ? hasItem
-                              ? 'bg-green-950/30 border-green-700/50 hover:border-green-500'
-                              : 'bg-red-950/20 border-red-900/30 hover:border-red-700'
-                            : 'bg-gray-800/50 border-gray-700 hover:border-gray-500'
+                              ? 'bg-green-950/40 border-green-700/50 hover:border-green-400 hover:shadow-[0_0_15px_rgba(74,222,128,0.15)]'
+                              : 'bg-red-950/30 border-red-900/30 hover:border-red-500 hover:shadow-[0_0_15px_rgba(239,68,68,0.15)]'
+                            : 'bg-gray-800/60 border-gray-700 hover:border-gray-400 hover:shadow-[0_0_15px_rgba(156,163,175,0.15)]'
                         }`}
                       >
                         <p className="font-medium text-gray-200">{choice.text}</p>
@@ -196,6 +222,19 @@ export default function GauntletPhase() {
           </div>
         </div>
       </div>
+      
+      {/* Bottom: Inventory */}
+      <div className="absolute bottom-0 left-0 w-full border-t border-gray-800 bg-gray-900/80 backdrop-blur-md z-30">
+        <Inventory onItemClick={setSelectedItem} />
+      </div>
+
+      {/* Item Guide Panel */}
+      {selectedItem && (
+        <ItemGuidePanel
+          itemId={selectedItem}
+          onClose={() => setSelectedItem(null)}
+        />
+      )}
     </div>
   )
 }

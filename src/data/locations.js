@@ -33,6 +33,15 @@ export const LOCATIONS = {
         description: 'The vending machine hums faintly. The power could go any moment.',
         lootTable: [{ itemId: 'energy_bar', chance: 1 }],
       },
+      {
+        id: 'msc_lostandfound',
+        name: 'Lost & Found Bin',
+        description: 'A plastic bin overflowing with forgotten student belongings.',
+        lootTable: [
+          { itemId: 'lanyard', chance: 0.8 },
+          { itemId: 'sunglasses', chance: 0.6 },
+        ],
+      },
     ],
   },
   LIBRARY: {
@@ -61,13 +70,19 @@ export const LOCATIONS = {
         id: 'library_reading',
         name: 'Reading Room Shelf',
         description: 'Rows of bookshelves. Something useful might be wedged between the volumes.',
-        lootTable: [{ itemId: 'food_can', chance: 0.5 }],
+        lootTable: [
+          { itemId: 'food_can', chance: 0.5 },
+          { itemId: 'textbook', chance: 0.7 },
+        ],
       },
       {
         id: 'library_study',
         name: 'Study Room Cabinet',
         description: 'A group study room. The cabinet underneath has seen better days.',
-        lootTable: [{ itemId: 'flashlight', chance: 0.5 }],
+        lootTable: [
+          { itemId: 'flashlight', chance: 0.5 },
+          { itemId: 'usb_drive', chance: 0.6 },
+        ],
       },
       {
         id: 'library_basement',
@@ -98,8 +113,7 @@ export const LOCATIONS = {
         id: 'muma_office',
         name: 'Faculty Office',
         description: 'Someone left in a hurry. Papers are scattered everywhere.',
-        lootTable: [],
-        flavorText: 'Nothing useful. Just scattered papers and a half-eaten lunch.',
+        lootTable: [{ itemId: 'phone_charger', chance: 0.8 }],
       },
     ],
   },

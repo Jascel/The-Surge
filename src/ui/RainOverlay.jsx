@@ -1,9 +1,21 @@
 import { useMemo } from 'react'
+import { useGame } from '../GameContext'
 
 export default function RainOverlay({ phase }) {
-  const intensity = phase === 'gauntlet' ? 80 : phase === 'gathering' ? 30 : 15
+  const { state } = useGame()
+  
+  const intensity = useMemo(() => {
+    if (phase === 'gauntlet') return 0; // Indoors during gauntlet
+    if (phase !== 'gathering' && phase !== 'sprint') return 0;
+    
+    const time = state.world.timeUntilLandfall;
+    if (time >= 8) return 20; // Stage 1
+    if (time >= 4) return 40; // Stage 2
+    return 60; // Stage 3
+  }, [phase, state.world.timeUntilLandfall])
 
   const drops = useMemo(() => {
+    if (intensity === 0) return [];
     return Array.from({ length: intensity }, (_, i) => ({
       id: i,
       left: `${Math.random() * 100}%`,
@@ -14,7 +26,7 @@ export default function RainOverlay({ phase }) {
     }))
   }, [intensity])
 
-  if (phase === 'start' || phase === 'audit') return null
+  if (intensity === 0) return null
 
   return (
     <div className="rain-overlay">

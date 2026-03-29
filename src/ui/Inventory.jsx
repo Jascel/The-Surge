@@ -24,7 +24,7 @@ export default function Inventory({ onItemClick }) {
             <button
               key={`${itemId}-${idx}`}
               onClick={() => onItemClick(itemId)}
-              className="flex items-center gap-1 bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-cyan-700 rounded px-2 py-1 text-xs transition-colors"
+              className="flex items-center gap-1 bg-gray-800/80 hover:bg-gray-700/80 border border-gray-700 hover:border-cyan-500 rounded px-2 py-1 text-xs transition-all duration-300 hover:scale-105 hover:shadow-[0_0_10px_rgba(6,182,212,0.2)] backdrop-blur-sm"
               title={item.name}
             >
               <span>{item.emoji}</span>

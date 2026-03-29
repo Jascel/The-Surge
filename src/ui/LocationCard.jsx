@@ -1,14 +1,26 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useGame } from '../GameContext'
 import { LOCATIONS } from '../data/locations'
 import { ITEMS } from '../data/items'
 import { INFRASTRUCTURE_TASKS } from '../data/infrastructure'
+import { getLocationImagePath } from '../utils/imagePaths'
+import { playSound } from '../utils/audio'
 
 export default function LocationCard() {
   const { state, dispatch } = useGame()
   const location = LOCATIONS[state.location]
   const [discoveredItem, setDiscoveredItem] = useState(null)
   const [areaMessage, setAreaMessage] = useState(null)
+  
+  // For smooth transitions between locations
+  const [currentImage, setCurrentImage] = useState(null)
+  const [fadeKey, setFadeKey] = useState(state.location)
+
+  useEffect(() => {
+    const newImage = getLocationImagePath(state.location, state.world.phase, state.world.timeUntilLandfall)
+    setCurrentImage(newImage)
+    setFadeKey(state.location + state.world.timeUntilLandfall)
+  }, [state.location, state.world.phase, state.world.timeUntilLandfall])
 
   if (!location) return null
 
@@ -39,6 +51,7 @@ export default function LocationCard() {
   }
 
   const handlePickUp = (itemId) => {
+    playSound('takeItem', 0.6)
     dispatch({ type: 'PICK_UP_ITEM', payload: itemId })
 
     if (discoveredItem) {
@@ -79,144 +92,43 @@ export default function LocationCard() {
   )
 
   return (
-    <div className="p-4 space-y-4">
-      {/* Location header */}
-      <div className={`bg-gradient-to-r ${location.gradient} rounded-lg p-4`}>
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-white">{location.name}</h2>
-          <div className="flex items-center gap-1">
-            <span className="text-xs text-gray-400">Elevation:</span>
-            <div className="flex gap-0.5">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div
-                  key={i}
-                  className={`w-2 h-3 rounded-sm ${
-                    i <= location.elevation ? 'bg-green-400' : 'bg-gray-700'
-                  }`}
-                />
-              ))}
+    <div className="p-4 h-full flex flex-col">
+      {/* Location header (takes up remaining space) */}
+      <div className="relative rounded-lg overflow-hidden flex-1 border border-gray-800 shadow-lg min-h-[300px]">
+        {/* Background Image with Ken Burns effect */}
+        {currentImage ? (
+          <div 
+            key={fadeKey}
+            className="absolute inset-0 bg-cover bg-center ken-burns-bg phase-fade-enter-active"
+            style={{ backgroundImage: `url("${currentImage}")` }}
+          />
+        ) : (
+          <div className={`absolute inset-0 bg-gradient-to-r ${location.gradient}`} />
+        )}
+        
+        {/* Gradient overlay to ensure text readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/40 to-transparent" />
+
+        {/* Header Content */}
+        <div className="absolute bottom-0 left-0 w-full p-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white drop-shadow-lg">{location.name}</h2>
+            <div className="flex items-center gap-2 bg-gray-950/70 px-3 py-1.5 rounded-lg backdrop-blur-md border border-gray-800">
+              <span className="text-sm text-gray-300 font-medium">Elevation:</span>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div
+                    key={i}
+                    className={`w-2.5 h-4 rounded-sm ${
+                      i <= location.elevation ? 'bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.6)]' : 'bg-gray-700'
+                    }`}
+                  />
+                ))}
+              </div>
             </div>
           </div>
+          <p className="text-lg text-gray-200 mt-3 drop-shadow-md max-w-2xl">{location.description}</p>
         </div>
-        <p className="text-sm text-gray-300 mt-2">{location.description}</p>
-      </div>
-
-      {/* Scavenge areas */}
-      <div className="space-y-2">
-        <h3 className="text-xs text-gray-500 uppercase tracking-wider">Search Areas</h3>
-        {location.areas.map((area) => {
-          const isLooted = state.lootedAreas.includes(area.id)
-          const isDiscovering = discoveredItem?.areaId === area.id
-          const hasMessage = areaMessage?.areaId === area.id
-
-          return (
-            <div key={area.id} className="space-y-1">
-              <button
-                onClick={() => handleSearchArea(area)}
-                disabled={isLooted}
-                className={`w-full text-left rounded-lg p-3 border transition-all ${
-                  isLooted
-                    ? 'bg-gray-900/50 border-gray-800 opacity-50 cursor-default'
-                    : area.isRisky
-                    ? 'bg-red-950/30 border-red-900/50 hover:border-red-700 hover:bg-red-950/50 cursor-pointer'
-                    : 'bg-gray-900/50 border-gray-700/50 hover:border-cyan-700 hover:bg-gray-800/50 cursor-pointer'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className={`font-medium ${isLooted ? 'text-gray-600' : 'text-gray-200'}`}>
-                    {area.name}
-                  </span>
-                  {isLooted && <span className="text-green-600 text-xs">{'\u2713'} Searched</span>}
-                  {area.isRisky && !isLooted && (
-                    <span className="text-red-400 text-xs">{'\u26A0'} Risky</span>
-                  )}
-                </div>
-                <p className={`text-xs mt-1 ${isLooted ? 'text-gray-700' : 'text-gray-500'}`}>
-                  {area.description}
-                </p>
-              </button>
-
-              {/* Found item display */}
-              {isDiscovering && discoveredItem.items[discoveredItem.currentIndex] && (
-                <ItemDiscovery
-                  itemId={discoveredItem.items[discoveredItem.currentIndex]}
-                  onPickUp={handlePickUp}
-                  onLeave={handleLeave}
-                />
-              )}
-
-              {/* Empty area message */}
-              {hasMessage && (
-                <div className="ml-4 text-sm text-gray-500 italic">
-                  {areaMessage.text}
-                </div>
-              )}
-            </div>
-          )
-        })}
-      </div>
-
-      {/* Infrastructure tasks */}
-      {availableTasks.length > 0 && (
-        <div className="space-y-2">
-          <h3 className="text-xs text-amber-500 uppercase tracking-wider">Infrastructure Tasks</h3>
-          {availableTasks.map((task) => {
-            const hasItem = !task.requiresItem || state.inventory.includes(task.requiresItem)
-            return (
-              <button
-                key={task.id}
-                onClick={() => handleInfraTask(task)}
-                disabled={!hasItem}
-                className={`w-full text-left rounded-lg p-3 border transition-all ${
-                  hasItem
-                    ? 'bg-amber-950/20 border-amber-700/50 hover:border-amber-500 hover:bg-amber-950/40 cursor-pointer'
-                    : 'bg-gray-900/30 border-gray-800 opacity-50 cursor-default'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-amber-300">{task.name}</span>
-                  {task.requiresItem && (
-                    <span className={`text-xs ${hasItem ? 'text-amber-500' : 'text-gray-600'}`}>
-                      Requires: {ITEMS[task.requiresItem]?.name}
-                    </span>
-                  )}
-                </div>
-                <p className="text-xs text-gray-500 mt-1">{task.description}</p>
-              </button>
-            )
-          })}
-        </div>
-      )}
-    </div>
-  )
-}
-
-function ItemDiscovery({ itemId, onPickUp, onLeave }) {
-  const item = ITEMS[itemId]
-  if (!item) return null
-
-  return (
-    <div className="ml-4 bg-cyan-950/30 border border-cyan-700/50 rounded-lg p-3 space-y-2">
-      <div className="flex items-center gap-2">
-        <span className="text-xl">{item.emoji}</span>
-        <div>
-          <p className="text-cyan-300 font-medium">Found: {item.name}!</p>
-          <p className="text-xs text-gray-400">Weight: {item.weight} | {item.guide.femaRef}</p>
-        </div>
-      </div>
-      <div className="flex gap-2">
-        <button
-          onClick={() => onPickUp(itemId)}
-          className="bg-cyan-700 hover:bg-cyan-600 text-white text-sm px-3 py-1 rounded transition-colors"
-        >
-          Pick Up
-        </button>
-        <button
-          onClick={onLeave}
-          className="bg-gray-700 hover:bg-gray-600 text-gray-300 text-sm px-3 py-1 rounded transition-colors"
-        >
-          Leave
-        </button>
       </div>
     </div>
   )

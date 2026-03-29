@@ -93,6 +93,31 @@
   animation: shake 0.3s ease-in-out;
 }
 
+/* Lightning flash */
+@keyframes lightning {
+  0% { opacity: 1; }
+  5% { opacity: 0.2; }
+  10% { opacity: 0.8; }
+  15% { opacity: 0.1; }
+  20% { opacity: 1; }
+  100% { opacity: 1; }
+}
+
+.lightning-flash {
+  animation: lightning 0.5s ease-out;
+}
+
+/* Ken Burns effect */
+@keyframes ken-burns {
+  0% { transform: scale(1) translate(0, 0); }
+  50% { transform: scale(1.05) translate(-1%, -1%); }
+  100% { transform: scale(1) translate(0, 0); }
+}
+
+.ken-burns-bg {
+  animation: ken-burns 30s ease-in-out infinite;
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 6px;

@@ -7,9 +7,33 @@ import AuditPhase from './phases/AuditPhase'
 import DeathScreen from './phases/DeathScreen'
 import RainOverlay from './ui/RainOverlay'
 import HealthVignette from './ui/HealthVignette'
+import { useWindSounds, playSound } from './utils/audio'
+import { useEffect } from 'react'
 
 function GameRouter() {
   const { state } = useGame()
+
+  useWindSounds(state.world.phase, state.world.timeUntilLandfall)
+
+  useEffect(() => {
+    const handleClick = (e) => {
+      const target = e.target
+      const isButton = target.closest('button')
+      if (!isButton) return
+
+      // Exclusions: map node, dispatcher button, pick up item
+      const isMapNode = target.closest('.map-node')
+      const isDispatcherToggle = target.closest('.dispatcher-toggle')
+      const isPickUp = target.closest('.pickup-button')
+
+      if (!isMapNode && !isDispatcherToggle && !isPickUp) {
+        playSound('buttonPress', 0.4)
+      }
+    }
+
+    window.addEventListener('click', handleClick)
+    return () => window.removeEventListener('click', handleClick)
+  }, [])
 
   const renderPhase = () => {
     switch (state.world.phase) {

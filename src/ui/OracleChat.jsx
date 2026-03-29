@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useGame } from '../GameContext'
 import { callGemini } from '../api/gemini'
+import { playSound } from '../utils/audio'
 
 function buildOraclePrompt(state) {
   return `You are the Emergency Oracle — a FEMA-trained radio dispatcher connected to USF Emergency Management.
@@ -26,9 +27,23 @@ export default function OracleChat({ onClose }) {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const chatEndRef = useRef(null)
+  const staticAudioRef = useRef(null)
 
   const hasRadio = state.inventory.includes('radio')
   const hasBattery = state.stats.battery > 0
+
+  useEffect(() => {
+    playSound('openDispatcher', 0.5)
+    
+    const staticAudio = playSound('dispatcherStatic', 0.2, true)
+    staticAudioRef.current = staticAudio
+
+    return () => {
+      if (staticAudioRef.current) {
+        staticAudioRef.current.pause()
+      }
+    }
+  }, [])
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -61,7 +76,7 @@ export default function OracleChat({ onClose }) {
 
   return (
     <div className="fixed bottom-0 right-0 w-full max-w-md z-50 m-4">
-      <div className="bg-gray-950 border border-green-800/50 rounded-lg shadow-2xl overflow-hidden">
+      <div className="bg-gray-950/90 backdrop-blur-md border border-green-800/50 rounded-lg shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between bg-green-950/50 px-4 py-2 border-b border-green-800/30">
           <div className="flex items-center gap-2">

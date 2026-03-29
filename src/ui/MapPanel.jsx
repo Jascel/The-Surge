@@ -1,6 +1,7 @@
 import { useGame } from '../GameContext'
 import { LOCATIONS } from '../data/locations'
 import { ROUTES, getConnections, isRouteFlooded } from '../data/routes'
+import { playSound } from '../utils/audio'
 
 // Node positions (percentage-based for responsive layout)
 const NODE_POSITIONS = {
@@ -20,6 +21,8 @@ export default function MapPanel() {
     if (!connections.includes(locationId)) return
     // Don't allow moving to hidden location unless campus_map is found
     if (LOCATIONS[locationId]?.hidden && !state.collectHistory.includes('campus_map')) return
+    
+    playSound('mapNode', 0.5)
     dispatch({ type: 'MOVE_TO', payload: locationId })
   }
 
@@ -29,9 +32,9 @@ export default function MapPanel() {
   })
 
   return (
-    <div className="p-4 h-full">
-      <h3 className="text-xs text-gray-500 uppercase tracking-wider mb-2">Campus Map</h3>
-      <div className="relative bg-gray-900/50 rounded-lg border border-gray-800 aspect-[4/3] overflow-hidden">
+    <div className="p-4 h-full backdrop-blur-md">
+      <h3 className="text-xs text-gray-400 uppercase tracking-wider mb-2 drop-shadow-sm">Campus Map</h3>
+      <div className="relative bg-gray-900/60 rounded-lg border border-gray-700/50 h-48 overflow-hidden shadow-lg backdrop-blur-sm">
         {/* Grid background */}
         <div
           className="absolute inset-0 opacity-10"
@@ -87,19 +90,19 @@ export default function MapPanel() {
               key={id}
               onClick={() => handleNodeClick(id)}
               disabled={!isConnected || isCurrent}
-              className="absolute transform -translate-x-1/2 -translate-y-1/2 group"
+              className="map-node absolute transform -translate-x-1/2 -translate-y-1/2 group"
               style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
             >
               {/* Node circle */}
               <div
-                className={`w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all text-[10px] font-bold ${
+                className={`w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all duration-300 text-[10px] font-bold ${
                   isCurrent
-                    ? 'bg-cyan-600 border-cyan-400 text-white shadow-lg shadow-cyan-500/30'
+                    ? 'bg-cyan-600 border-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.5)] scale-110'
                     : isConnected
                     ? isFlooded
-                      ? 'bg-blue-900/60 border-blue-500 text-blue-300 hover:bg-blue-800/60 cursor-pointer'
-                      : 'bg-gray-800 border-gray-500 text-gray-300 hover:bg-gray-700 hover:border-cyan-500 cursor-pointer'
-                    : 'bg-gray-900 border-gray-700 text-gray-600'
+                      ? 'bg-blue-900/80 border-blue-500 text-blue-300 hover:bg-blue-800 hover:scale-110 hover:shadow-[0_0_10px_rgba(59,130,246,0.5)] cursor-pointer'
+                      : 'bg-gray-800/80 border-gray-500 text-gray-300 hover:bg-gray-700 hover:border-cyan-500 hover:scale-110 hover:shadow-[0_0_10px_rgba(156,163,175,0.5)] cursor-pointer'
+                    : 'bg-gray-900/80 border-gray-700 text-gray-600'
                 }`}
               >
                 {loc.elevation}

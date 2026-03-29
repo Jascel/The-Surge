@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import { useGame } from '../GameContext'
 import { ITEMS } from '../data/items'
 import { callGemini } from '../api/gemini'
+import { getLocationImagePath } from '../utils/imagePaths'
+import { playSound } from '../utils/audio'
 
 function buildAuditPrompt(state) {
   const survived = state.stats.health > 0
@@ -62,6 +64,16 @@ export default function AuditPhase() {
         if (!cancelled) {
           setReportHtml(html)
           setLoading(false)
+
+          // Play win sound only if grade is A or B
+          // We look for the grade in the HTML (usually in a header or bold text)
+          const gradeMatch = html.match(/Overall Grade[:\s]*([A-F])/i)
+          if (gradeMatch) {
+            const grade = gradeMatch[1].toUpperCase()
+            if (grade === 'A' || grade === 'B') {
+              playSound('win', 0.7)
+            }
+          }
         }
       } catch (err) {
         if (!cancelled) {
@@ -90,10 +102,20 @@ export default function AuditPhase() {
     dispatch({ type: 'RESET_GAME' })
   }
 
+  const bgImage = getLocationImagePath(state.location, 'gauntlet', 0)
+
   return (
-    <div className="min-h-screen flex flex-col bg-gray-950">
+    <div className="h-[100dvh] flex flex-col relative">
+      {bgImage && (
+        <div 
+          className="absolute inset-0 bg-cover bg-center z-0"
+          style={{ backgroundImage: `url("${bgImage}")`, filter: 'grayscale(50%) brightness(20%)' }}
+        />
+      )}
+      <div className="absolute inset-0 bg-gray-950/90 backdrop-blur-md z-0" />
+
       {/* Header */}
-      <div className="bg-gray-900 border-b border-gray-800 px-4 py-3 flex items-center justify-between">
+      <div className="bg-gray-900/80 backdrop-blur-md border-b border-gray-800 px-4 py-3 flex items-center justify-between relative z-10 shadow-md">
         <div>
           <h1 className="text-lg font-bold text-white tracking-wider">
             FEMA Resilience Report
@@ -106,13 +128,13 @@ export default function AuditPhase() {
           <button
             onClick={handleDownload}
             disabled={!reportHtml}
-            className="bg-cyan-700 hover:bg-cyan-600 disabled:bg-gray-700 text-white text-sm px-4 py-2 rounded transition-colors"
+            className="bg-cyan-700 hover:bg-cyan-600 disabled:bg-gray-700 text-white text-sm px-4 py-2 rounded transition-all duration-300 hover:scale-105 hover:shadow-[0_0_10px_rgba(6,182,212,0.3)]"
           >
             Download Report
           </button>
           <button
             onClick={handlePlayAgain}
-            className="bg-gray-700 hover:bg-gray-600 text-white text-sm px-4 py-2 rounded transition-colors"
+            className="bg-gray-700 hover:bg-gray-600 text-white text-sm px-4 py-2 rounded transition-all duration-300 hover:scale-105 hover:shadow-[0_0_10px_rgba(255,255,255,0.1)]"
           >
             Play Again
           </button>
@@ -120,7 +142,7 @@ export default function AuditPhase() {
       </div>
 
       {/* Report */}
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto relative z-10">
         {loading && (
           <div className="flex items-center justify-center h-64">
             <div className="text-center space-y-4">
