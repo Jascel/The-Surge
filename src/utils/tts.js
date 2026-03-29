@@ -1,6 +1,22 @@
+import { setGlobalDucking } from './audio'
+
 const TTS_API_URL = 'https://texttospeech.googleapis.com/v1/text:synthesize'
 
 let audioContext = null
+let currentSource = null
+
+export function stopDispatcherSpeech() {
+  if (currentSource) {
+    try {
+      currentSource.stop()
+    } catch (e) {}
+    currentSource = null
+  }
+  if (window.speechSynthesis) {
+    window.speechSynthesis.cancel()
+  }
+  setGlobalDucking(false)
+}
 
 function getAudioContext() {
   if (!audioContext) {
@@ -13,24 +29,32 @@ function applyRadioFilter(ctx, buffer) {
   const source = ctx.createBufferSource()
   source.buffer = buffer
 
-  // Bandpass filter for radio compression effect
-  const bandpass = ctx.createBiquadFilter()
-  bandpass.type = 'bandpass'
-  bandpass.frequency.value = 1500
-  bandpass.Q.value = 0.7
+  // Light highpass to cut mud
+  const highpass = ctx.createBiquadFilter()
+  highpass.type = 'highpass'
+  highpass.frequency.value = 250
+  highpass.Q.value = 0.3
 
-  // Slight distortion for radio crackle
+  // Very gentle bandpass — just a hint of radio color
+  const bandpass = ctx.createBiquadFilter()
+  bandpass.type = 'peaking'
+  bandpass.frequency.value = 2000
+  bandpass.Q.value = 0.5
+  bandpass.gain.value = 3
+
+  // Minimal compression for broadcast feel
   const compressor = ctx.createDynamicsCompressor()
-  compressor.threshold.value = -30
-  compressor.knee.value = 10
-  compressor.ratio.value = 12
-  compressor.attack.value = 0
+  compressor.threshold.value = -18
+  compressor.knee.value = 20
+  compressor.ratio.value = 3
+  compressor.attack.value = 0.003
   compressor.release.value = 0.25
 
   const gain = ctx.createGain()
-  gain.gain.value = 1.5
+  gain.gain.value = 1.2
 
-  source.connect(bandpass)
+  source.connect(highpass)
+  highpass.connect(bandpass)
   bandpass.connect(compressor)
   compressor.connect(gain)
   gain.connect(ctx.destination)
@@ -48,7 +72,7 @@ async function speakWithGoogleTTS(text) {
     body: JSON.stringify({
       input: { text },
       voice: { languageCode: 'en-US', name: 'en-US-Neural2-D' },
-      audioConfig: { audioEncoding: 'MP3' },
+      audioConfig: { audioEncoding: 'MP3', speakingRate: 1.2 },
     }),
   })
 
@@ -65,8 +89,15 @@ async function speakWithGoogleTTS(text) {
   const audioBuffer = await ctx.decodeAudioData(bytes.buffer)
   const source = applyRadioFilter(ctx, audioBuffer)
 
+  currentSource = source
+
   return new Promise((resolve) => {
-    source.onended = resolve
+    source.onended = () => {
+      if (currentSource === source) {
+        currentSource = null
+      }
+      resolve()
+    }
     source.start(0)
   })
 }
@@ -91,6 +122,9 @@ function speakWithWebSpeech(text) {
  * Falls back: Google TTS → Web Speech API → silent resolve.
  */
 export async function speakAsDispatcher(text) {
+  stopDispatcherSpeech()
+  setGlobalDucking(true)
+
   try {
     await speakWithGoogleTTS(text)
   } catch (e) {
@@ -99,7 +133,8 @@ export async function speakAsDispatcher(text) {
       await speakWithWebSpeech(text)
     } catch (e2) {
       console.warn('Web Speech also failed:', e2)
-      // Silent fallback — text still displays in chat
     }
+  } finally {
+    setGlobalDucking(false)
   }
 }

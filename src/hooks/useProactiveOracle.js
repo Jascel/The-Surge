@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react'
 
-// Module-level so it persists across remounts
-const firedSet = new Set()
+function getFired() {
+  try { return new Set(JSON.parse(sessionStorage.getItem('oracleFired') || '[]')) } catch { return new Set() }
+}
+function markFired(id) {
+  const s = getFired(); s.add(id); sessionStorage.setItem('oracleFired', JSON.stringify([...s]))
+}
 let lastAlertTime = 0
 
 const PROACTIVE_TRIGGERS = [
@@ -20,21 +24,6 @@ const PROACTIVE_TRIGGERS = [
     check: (state) => state.stats.hunger <= 0,
     message: 'You need calories. Search for food now.',
   },
-  {
-    id: 'time_6',
-    check: (state) => state.world.phase === 'gathering' && state.world.timeUntilLandfall <= 6,
-    message: 'Six hours to landfall. Start thinking about shelter.',
-  },
-  {
-    id: 'time_3',
-    check: (state) => state.world.phase === 'gathering' && state.world.timeUntilLandfall <= 3,
-    message: 'Three hours. Get to high ground NOW.',
-  },
-  {
-    id: 'time_1',
-    check: (state) => state.world.phase === 'gathering' && state.world.timeUntilLandfall <= 1,
-    message: "Final hour. If you're not sheltered, you won't make it.",
-  },
 ]
 
 export function useProactiveOracle(state) {
@@ -43,11 +32,12 @@ export function useProactiveOracle(state) {
   useEffect(() => {
     const now = Date.now()
     if (now - lastAlertTime < 30000) return
+    if (activeDispatch) return // don't queue another while one is showing
 
     for (const trigger of PROACTIVE_TRIGGERS) {
-      if (firedSet.has(trigger.id)) continue
+      if (getFired().has(trigger.id)) continue
       if (trigger.check(state)) {
-        firedSet.add(trigger.id)
+        markFired(trigger.id)
         lastAlertTime = now
         setActiveDispatch(trigger.message)
         break
@@ -59,6 +49,7 @@ export function useProactiveOracle(state) {
     state.stats.hunger,
     state.world.timeUntilLandfall,
     state.world.phase,
+    activeDispatch,
   ])
 
   const dismissDispatch = () => setActiveDispatch(null)

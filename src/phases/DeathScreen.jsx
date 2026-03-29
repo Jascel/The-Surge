@@ -41,12 +41,20 @@ export default function DeathScreen() {
           Your choices still matter. See what could have saved you.
         </p>
 
-        <button
-          onClick={() => dispatch({ type: 'SET_PHASE', payload: 'audit' })}
-          className="bg-gray-800/80 hover:bg-gray-700/80 text-gray-300 py-3 px-8 rounded tracking-wider transition-all duration-300 hover:scale-105 hover:shadow-[0_0_15px_rgba(255,255,255,0.1)] backdrop-blur-sm"
-        >
-          View Your Resilience Report
-        </button>
+        <div className="flex flex-col gap-3">
+          <button
+            onClick={() => dispatch({ type: 'SET_PHASE', payload: 'audit' })}
+            className="bg-gray-800/80 hover:bg-gray-700/80 text-gray-300 py-3 px-8 rounded tracking-wider transition-all duration-300 hover:scale-105 hover:shadow-[0_0_15px_rgba(255,255,255,0.1)] backdrop-blur-sm"
+          >
+            View Your Resilience Report
+          </button>
+          <button
+            onClick={() => dispatch({ type: 'RESET_GAME' })}
+            className="text-gray-600 hover:text-gray-400 text-sm py-2 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
       </div>
 
       <style>{`

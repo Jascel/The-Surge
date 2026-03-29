@@ -19,16 +19,34 @@ const SOUNDS = {
 
 const audioCache = {}
 
+const activeBackgroundAudio = new Set()
+
+export const setGlobalDucking = (isDucking) => {
+  activeBackgroundAudio.forEach((audio) => {
+    if (audio.paused) {
+      activeBackgroundAudio.delete(audio)
+      return
+    }
+    if (isDucking) {
+      audio.volume = (audio.originalVolume || 0.5) * 0.25
+    } else {
+      audio.volume = audio.originalVolume || 0.5
+    }
+  })
+}
+
 export const playSound = (soundKey, volume = 0.5, loop = false) => {
   const src = SOUNDS[soundKey]
   if (!src) return null
 
   const audio = new Audio(src)
+  audio.originalVolume = volume
   audio.volume = volume
   audio.loop = loop
   
   // Ensure background sounds (looping) don't get interrupted
   if (loop) {
+    activeBackgroundAudio.add(audio)
     audio.addEventListener('ended', () => {
       if (audio.loop) {
         audio.currentTime = 0
@@ -77,6 +95,38 @@ export const useWindSounds = (phase, timeUntilLandfall) => {
       if (audioRef.current) {
         audioRef.current.pause()
         audioRef.current = null
+      }
+    }
+  }, [soundKey])
+
+  // Random thunder in stage 3 and gauntlet
+  useEffect(() => {
+    let thunderTimer = null
+    let isActive = true
+
+    const scheduleThunder = () => {
+      if (!isActive) return
+      
+      // Only play in stage 3 or gauntlet
+      if (soundKey === 'windStage3' || soundKey === 'windGauntlet') {
+        // 15 to 35 seconds between thunders
+        const delay = 15000 + Math.random() * 20000
+        thunderTimer = setTimeout(() => {
+          if (!isActive) return
+          const thunderKey = Math.random() > 0.5 ? 'thunder1' : 'thunder2'
+          // Background noise volume
+          playSound(thunderKey, 0.2)
+          scheduleThunder()
+        }, delay)
+      }
+    }
+
+    scheduleThunder()
+
+    return () => {
+      isActive = false
+      if (thunderTimer) {
+        clearTimeout(thunderTimer)
       }
     }
   }, [soundKey])

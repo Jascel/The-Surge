@@ -3,7 +3,7 @@ import { useGame } from '../GameContext'
 import { LOCATIONS } from '../data/locations'
 import { ITEMS } from '../data/items'
 import { INFRASTRUCTURE_TASKS } from '../data/infrastructure'
-import { getLocationImagePath } from '../utils/imagePaths'
+import { getLocationImagePath, getLocationOverlayStyle } from '../utils/imagePaths'
 import { playSound } from '../utils/audio'
 import EmergencyAlert from './EmergencyAlert'
 
@@ -104,7 +104,10 @@ export default function LocationCard() {
           <div 
             key={fadeKey}
             className="absolute inset-0 bg-cover bg-center ken-burns-bg phase-fade-enter-active"
-            style={{ backgroundImage: `url("${currentImage}")` }}
+            style={{ 
+              backgroundImage: `url("${currentImage}")`,
+              ...getLocationOverlayStyle(state.location, state.world.phase, state.world.timeUntilLandfall)
+            }}
           />
         ) : (
           <div className={`absolute inset-0 bg-gradient-to-r ${location.gradient}`} />

@@ -4,10 +4,11 @@ import { LOCATIONS } from '../data/locations'
 import { getHopDistance } from '../data/routes'
 import StatsBar from '../ui/StatsBar'
 import EmergencyAlert from '../ui/EmergencyAlert'
-import { getLocationImagePath } from '../utils/imagePaths'
+import { getLocationImagePath, getLocationOverlayStyle } from '../utils/imagePaths'
 
 export default function SprintPhase() {
   const { state, dispatch, activeAlert, dismissAlert } = useGame()
+  const alreadySecured = state.infrastructureDone.includes('secure_vehicles')
   const [step, setStep] = useState('alert') // 'alert' | 'vehicle' | 'shelter'
   
   const bgImage = getLocationImagePath(state.location, 'sprint', state.world.timeUntilLandfall)
@@ -41,7 +42,10 @@ export default function SprintPhase() {
         {bgImage && (
           <div 
             className="absolute inset-0 bg-cover bg-center z-0 ken-burns-bg"
-            style={{ backgroundImage: `url("${bgImage}")` }}
+            style={{ 
+              backgroundImage: `url("${bgImage}")`,
+              ...getLocationOverlayStyle(state.location, 'sprint', state.world.timeUntilLandfall)
+            }}
           />
         )}
         <div className="absolute inset-0 bg-gray-950/80 backdrop-blur-sm z-0" />
@@ -56,7 +60,7 @@ export default function SprintPhase() {
             </p>
           </div>
           <button
-            onClick={() => setStep('vehicle')}
+            onClick={() => setStep(alreadySecured ? 'shelter' : 'vehicle')}
             className="bg-red-700 hover:bg-red-600 text-white font-bold py-3 px-8 rounded tracking-wider transition-colors"
           >
             Proceed
@@ -73,7 +77,10 @@ export default function SprintPhase() {
         {bgImage && (
           <div 
             className="absolute inset-0 bg-cover bg-center z-0 ken-burns-bg"
-            style={{ backgroundImage: `url("${bgImage}")` }}
+            style={{ 
+              backgroundImage: `url("${bgImage}")`,
+              ...getLocationOverlayStyle(state.location, 'sprint', state.world.timeUntilLandfall)
+            }}
           />
         )}
         <div className="absolute inset-0 bg-gray-950/80 backdrop-blur-sm z-0" />
@@ -124,14 +131,17 @@ export default function SprintPhase() {
   })
 
   return (
-    <div className="h-[100dvh] flex flex-col relative">
-      {activeAlert && <EmergencyAlert message={activeAlert} onDismiss={dismissAlert} />}
-      {bgImage && (
-        <div 
-          className="absolute inset-0 bg-cover bg-center z-0 ken-burns-bg"
-          style={{ backgroundImage: `url("${bgImage}")` }}
-        />
-      )}
+      <div className="h-[100dvh] flex flex-col relative">
+        {activeAlert && <EmergencyAlert message={activeAlert} onDismiss={dismissAlert} />}
+        {bgImage && (
+          <div 
+            className="absolute inset-0 bg-cover bg-center z-0 ken-burns-bg"
+            style={{ 
+              backgroundImage: `url("${bgImage}")`,
+              ...getLocationOverlayStyle(state.location, 'sprint', state.world.timeUntilLandfall)
+            }}
+          />
+        )}
       <div className="absolute inset-0 bg-gray-950/80 backdrop-blur-sm z-0" />
       
       <StatsBar />

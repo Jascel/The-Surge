@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useGame } from '../GameContext'
 import { callGemini } from '../api/gemini'
-import { playSound } from '../utils/audio'
+import { playSound, setGlobalDucking } from '../utils/audio'
 import { speakAsDispatcher } from '../utils/tts'
 import { startListening, stopListening } from '../utils/stt'
 
@@ -124,11 +124,9 @@ export default function OracleChat({ onClose }) {
 
       // Speak the response via TTS
       setSpeaking(true)
-      if (staticAudioRef.current) staticAudioRef.current.volume = 0.05
       try {
         await speakAsDispatcher(response)
       } catch {}
-      if (staticAudioRef.current) staticAudioRef.current.volume = 0.2
       setSpeaking(false)
     } catch (err) {
       setMessages((prev) => [
@@ -160,19 +158,22 @@ export default function OracleChat({ onClose }) {
     if (micState !== 'idle') return
 
     setMicState('listening')
-    if (staticAudioRef.current) staticAudioRef.current.volume = 0.05
+    setGlobalDucking(true)
 
     try {
       const transcript = await startListening()
       setMicState('processing')
-      if (staticAudioRef.current) staticAudioRef.current.volume = 0.2
+      setGlobalDucking(false)
       if (transcript.trim()) {
         await sendMessage(transcript.trim())
       }
     } catch (err) {
       console.warn('Mic error:', err)
-      if (staticAudioRef.current) staticAudioRef.current.volume = 0.2
+      setGlobalDucking(false)
     } finally {
+      if (micState !== 'processing') {
+        setGlobalDucking(false)
+      }
       setMicState('idle')
     }
   }
