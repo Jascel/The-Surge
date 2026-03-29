@@ -5,15 +5,18 @@ import { ITEMS } from '../data/items'
 import StatsBar from '../ui/StatsBar'
 import Inventory from '../ui/Inventory'
 import ItemGuidePanel from '../ui/ItemGuidePanel'
+import OracleChat from '../ui/OracleChat'
+import EmergencyAlert from '../ui/EmergencyAlert'
 import { getLocationImagePath } from '../utils/imagePaths'
 
 export default function GauntletPhase() {
-  const { state, dispatch } = useGame()
+  const { state, dispatch, activeAlert, dismissAlert } = useGame()
   const [eventIndex, setEventIndex] = useState(0)
   const [outcome, setOutcome] = useState(null)
   const [shaking, setShaking] = useState(false)
   const [flashing, setFlashing] = useState(false)
   const [selectedItem, setSelectedItem] = useState(null)
+  const [oracleOpen, setOracleOpen] = useState(false)
 
   const currentEvent = GAUNTLET_EVENTS[eventIndex]
   
@@ -94,6 +97,7 @@ export default function GauntletPhase() {
 
   return (
     <div className={`h-[100dvh] flex flex-col relative ${shaking ? 'screen-shake' : ''}`}>
+      {activeAlert && <EmergencyAlert message={activeAlert} onDismiss={dismissAlert} />}
       {/* Full-screen background image */}
       {bgImage && (
         <div 
@@ -223,9 +227,21 @@ export default function GauntletPhase() {
         </div>
       </div>
       
-      {/* Bottom: Inventory */}
+      {/* Bottom: Inventory + Oracle toggle */}
       <div className="absolute bottom-0 left-0 w-full border-t border-gray-800 bg-gray-900/80 backdrop-blur-md z-30">
         <Inventory onItemClick={setSelectedItem} />
+        <div className="flex justify-end px-4 pb-2">
+          <button
+            onClick={() => setOracleOpen(!oracleOpen)}
+            className="dispatcher-toggle flex items-center gap-2 bg-green-900/50 hover:bg-green-800/50 border border-green-700/50 hover:border-green-400 rounded px-3 py-1.5 text-sm text-green-400 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_15px_rgba(74,222,128,0.2)]"
+          >
+            <span>{'\u{1F4FB}'}</span>
+            <span>Oracle</span>
+            {state.inventory.includes('radio') && state.stats.battery > 0 && (
+              <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Item Guide Panel */}
@@ -234,6 +250,11 @@ export default function GauntletPhase() {
           itemId={selectedItem}
           onClose={() => setSelectedItem(null)}
         />
+      )}
+
+      {/* Oracle Chat */}
+      {oracleOpen && (
+        <OracleChat onClose={() => setOracleOpen(false)} />
       )}
     </div>
   )

@@ -7,11 +7,14 @@ import MapPanel from '../ui/MapPanel'
 import Inventory from '../ui/Inventory'
 import ItemGuidePanel from '../ui/ItemGuidePanel'
 import OracleChat from '../ui/OracleChat'
+import DispatchAlert from '../ui/DispatchAlert'
+import { useProactiveOracle } from '../hooks/useProactiveOracle'
 
 export default function GatheringPhase() {
   const { state } = useGame()
   const [selectedItem, setSelectedItem] = useState(null)
   const [oracleOpen, setOracleOpen] = useState(false)
+  const { activeDispatch, dismissDispatch } = useProactiveOracle(state)
 
   return (
     <div className="h-[100dvh] flex flex-col bg-gray-950">
@@ -73,6 +76,11 @@ export default function GatheringPhase() {
       {/* Oracle Chat */}
       {oracleOpen && (
         <OracleChat onClose={() => setOracleOpen(false)} />
+      )}
+
+      {/* Proactive Oracle Dispatch */}
+      {activeDispatch && (
+        <DispatchAlert message={activeDispatch} onDismiss={dismissDispatch} />
       )}
     </div>
   )

@@ -3,10 +3,11 @@ import { useGame } from '../GameContext'
 import { LOCATIONS } from '../data/locations'
 import { getHopDistance } from '../data/routes'
 import StatsBar from '../ui/StatsBar'
+import EmergencyAlert from '../ui/EmergencyAlert'
 import { getLocationImagePath } from '../utils/imagePaths'
 
 export default function SprintPhase() {
-  const { state, dispatch } = useGame()
+  const { state, dispatch, activeAlert, dismissAlert } = useGame()
   const [step, setStep] = useState('alert') // 'alert' | 'vehicle' | 'shelter'
   
   const bgImage = getLocationImagePath(state.location, 'sprint', state.world.timeUntilLandfall)
@@ -36,6 +37,7 @@ export default function SprintPhase() {
   if (step === 'alert') {
     return (
       <div className="h-[100dvh] flex items-center justify-center relative">
+        {activeAlert && <EmergencyAlert message={activeAlert} onDismiss={dismissAlert} />}
         {bgImage && (
           <div 
             className="absolute inset-0 bg-cover bg-center z-0 ken-burns-bg"
@@ -67,6 +69,7 @@ export default function SprintPhase() {
   if (step === 'vehicle') {
     return (
       <div className="h-[100dvh] flex flex-col relative">
+        {activeAlert && <EmergencyAlert message={activeAlert} onDismiss={dismissAlert} />}
         {bgImage && (
           <div 
             className="absolute inset-0 bg-cover bg-center z-0 ken-burns-bg"
@@ -122,6 +125,7 @@ export default function SprintPhase() {
 
   return (
     <div className="h-[100dvh] flex flex-col relative">
+      {activeAlert && <EmergencyAlert message={activeAlert} onDismiss={dismissAlert} />}
       {bgImage && (
         <div 
           className="absolute inset-0 bg-cover bg-center z-0 ken-burns-bg"

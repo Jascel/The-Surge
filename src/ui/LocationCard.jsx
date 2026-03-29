@@ -5,9 +5,10 @@ import { ITEMS } from '../data/items'
 import { INFRASTRUCTURE_TASKS } from '../data/infrastructure'
 import { getLocationImagePath } from '../utils/imagePaths'
 import { playSound } from '../utils/audio'
+import EmergencyAlert from './EmergencyAlert'
 
 export default function LocationCard() {
-  const { state, dispatch } = useGame()
+  const { state, dispatch, activeAlert, dismissAlert } = useGame()
   const location = LOCATIONS[state.location]
   const [discoveredItem, setDiscoveredItem] = useState(null)
   const [areaMessage, setAreaMessage] = useState(null)
@@ -95,6 +96,9 @@ export default function LocationCard() {
     <div className="p-4 h-full flex flex-col">
       {/* Location header (takes up remaining space) */}
       <div className="relative rounded-lg overflow-hidden flex-1 border border-gray-800 shadow-lg min-h-[300px]">
+        {/* Emergency Alert (slides down from top of card) */}
+        {activeAlert && <EmergencyAlert message={activeAlert} onDismiss={dismissAlert} />}
+
         {/* Background Image with Ken Burns effect */}
         {currentImage ? (
           <div 

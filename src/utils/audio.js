@@ -12,6 +12,9 @@ const SOUNDS = {
   windStage2: '/sounds/stage winds/stage 2.mp3',
   windStage3: '/sounds/stage winds/stage 3.mp3',
   windGauntlet: '/sounds/stage winds/gauntlet.mp3',
+  startMusic: '/sounds/music/start screen music.mp3',
+  thunder1: '/sounds/FX/thunder 1.mp3',
+  thunder2: '/sounds/FX/thunder 2.mp3',
 }
 
 const audioCache = {}
