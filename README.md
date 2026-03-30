@@ -35,9 +35,10 @@ In this simulation, players must navigate the USF campus as Category 5 Hurricane
     ```bash
     npm install
     ```
-3.  Create a `.env` file in the root directory and add your API keys:
+3.  Create a `.env` file in the root directory and add your API keys (Google TTS optional:
     ```env
     VITE_GEMINI_API_KEY=your_api_key_here
+    VITE_GOOGLE_TTS_API_KEY=yout_api_key_here
     ```
 4.  Start the development server:
     ```bash
