@@ -2,6 +2,8 @@
 
 The Surge is a web-based survival simulation designed for HackUSF 2026. It serves as an educational tool to inform students and residents about proper weather emergency preparation and plans of action through an interactive digital twin of the USF Tampa Campus.
 
+https://devpost.com/software/the-surge-usf
+
 ## Overview
 
 In this simulation, players must navigate the USF campus as Category 5 Hurricane Helios approaches. The game is divided into distinct phases:
@@ -47,4 +49,4 @@ In this simulation, players must navigate the USF campus as Category 5 Hurricane
 
 ## License
 
-This project was developed for HackUSF 2026. All rights reserved.
+This project was developed for HackUSF 2026.
